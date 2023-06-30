@@ -1,0 +1,19 @@
+{% extends "baza.html" %}
+
+{% block title %}Создание{% endblock %}
+<h1>Create Category</h1>
+
+{% block content %}
+    <form action="{% url "categories_create_view" %}" method="post">
+        {% csrf_token %}
+        <label>Name:</label><br/>
+        <label>
+            <input type="text" name="Name"/>
+        </label><br/>
+        <label>description:</label><br/>
+        <label>
+            <textarea name="description"></textarea>
+        </label><br/>
+        <input type="submit" value="Send"/>
+    </form>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "baza.html" %}
+
+{% block link %}
+    <div class="">
+        <ul>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "create_product" %}">Создание продукта</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "categories_create_view" %}">Создание категории</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <br>
+ {% for product in products %}
+        <div class="card mt-3 col-4" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">{{ product.cost }}$</h6>
+                <p class="card-text">{{ product.category }}</p>
+                <a href="{% url "product_view" product.pk %}" class="card-link">See more</a>
+            </div>
+        </div>
+ {% endfor %}
+{% endblock %}

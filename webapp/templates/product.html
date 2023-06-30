@@ -1,0 +1,12 @@
+{% extends "baza.html" %}
+
+{% block content %}
+    <div class="card-body">
+        <h5 class="card-title mt-3">{{ product.name }}</h5>
+        <p class="card-text">{{ product.category.name }}</p>
+        <p class="card-text">{{ product.cost }}</p>
+        <p class="card-text">{{ product.description }}</p>
+        <p class="card-text"> дата изменения: {{ product.updated_at }}</p>
+        <img  src={{ product.image }} alt="">
+    </div>
+{% endblock %}

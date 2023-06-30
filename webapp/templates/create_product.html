@@ -1,0 +1,27 @@
+{% extends "baza.html" %}
+
+{% block title %}Создание{% endblock %}
+<h1>Create Product</h1>
+
+{% block content %}
+    <form action="{% url "create_product" %}" method="post">
+        {% csrf_token %}
+        <label>Name:</label><br/>
+        <label>
+            <input type="text" name="Name"/>
+        </label><br/>
+        <label>description:</label><br/>
+        <textarea name="description"></textarea><br/>
+        <label>cost:</label><br/>
+        <input type="int" name="cost"/><br/>
+        <label>Photo:</label><br/>
+        <input type="text" name="Url for photo">
+        <br/>
+        <select name="category_id" id="">
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Send"/>
+    </form>
+{% endblock %}
