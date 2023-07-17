@@ -14,15 +14,44 @@
 {% endblock %}
 
 {% block content %}
+    <h1>Products</h1>
     <br>
- {% for product in products %}
-        <div class="card mt-3 col-4" style="width: 18rem;">
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">{{ product.cost }}$</h6>
-                <p class="card-text">{{ product.category }}</p>
-                <a href="{% url "product_view" product.pk %}" class="card-link">See more</a>
+     <h2><a href="{% url "cart" %}">Корзина</a></h2>
+    <br>
+    {% include "partial/search_form.html" %}
+    <div class="row">
+        {% for product in products %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card mt-3" style="width: 18rem;">
+                    <div class="card-header">
+                        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                            <button type="button" class="btn btn-primary">
+                                <a href="{% url "product_view" product.pk %}" class="btn btn-primary"><i
+                                    class="bi bi-blockquote-right"></i></a></button>
+                            <button type="button" class="btn btn-primary">
+                                <a href="{% url "update_product" product.pk %}"
+                               class="btn btn-primary"><i class="bi bi-pencil-square"></i></a></button>
+                            <button type="button" class="btn btn-primary">
+                                <a href="{% url "delete_product" product.pk %}" class="btn btn-primary"><i
+                                    class="bi bi-trash3"></i></a></button>
+                            <form action="{% url 'add_to_cart' product.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary"><i class="bi bi-bag-plus"></i></button>
+            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">{{ product.description }}</h6>
+                        <p>{{ product.cost }}</p>
+                    </div>
+                </div>
             </div>
-        </div>
- {% endfor %}
+            {% empty %}
+            <h2>статьи не найдены</h2>
+        {% endfor %}
+    </div>
+ {% if is_paginated %}
+        {% include 'partial/paginator.html' %}
+    {% endif %}
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from webapp.models import Product, Category
+from webapp.models import Product, Category, CartItem, Ordering
 
 admin.site.register(Category)
 
@@ -15,3 +15,14 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Product, ProductAdmin)
+
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+
+
+class OrderingAdmin(admin.ModelAdmin):
+    inlines = (CartItemInline,)
+
+
+admin.site.register(Ordering, OrderingAdmin)

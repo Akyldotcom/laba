@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -23,8 +24,9 @@ class Product(models.Model):
                                  null=True
                                  )
     cost = models.DecimalField(decimal_places=2, max_digits=10)
-    # image = models.URLField()
-    image = models.ImageField(upload_to=None)
+    stock = models.PositiveIntegerField(default=1)
+    image = models.URLField(verbose_name="photo", blank=True)
+    # image = models.ImageField(upload_to=None)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
 
@@ -35,3 +37,17 @@ class Product(models.Model):
         db_table = "products"
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
+
+
+class Ordering(models.Model):
+    products = models.ManyToManyField(Product, through='CartItem')
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    address = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CartItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Ordering, on_delete=models.CASCADE, default=1)
+    quantity = models.PositiveIntegerField(default=1)

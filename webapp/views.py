@@ -1,9 +1,12 @@
 from django.db.models import Q
-from django.shortcuts import render, redirect, get_object_or_404, reverse
+from django.db.models.functions import Lower
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseNotFound
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.html import urlencode
-from webapp.models import Product, Category
+from django.views import View
+
+from webapp.models import Product, Category, CartItem, Ordering
 
 from django.views.generic import FormView, ListView, DeleteView, UpdateView, TemplateView
 from webapp.forms import SearchForm, ProductForm
@@ -13,8 +16,8 @@ class ProductListView(ListView):
     model = Product
     template_name = "index.html"
     context_object_name = "products"
-    ordering = ("-updated_at",)
-    paginate_by = 7
+    ordering = [Lower('name')]
+    paginate_by = 6
 
     def dispatch(self, request, *args, **kwargs):
         self.form = self.get_search_form()
@@ -42,7 +45,8 @@ class ProductListView(ListView):
         print(self.search_value)
         if self.search_value:
             queryset = queryset.filter(Q(name__icontains=self.search_value) |
-                                       Q(description__icontains=self.search_value))
+                                       Q(description__icontains=self.search_value) |
+                                       Q(cost__icontains=self.search_value))
         return queryset
 
 
@@ -63,7 +67,7 @@ class ProductUpdateView(UpdateView):
     model = Product
     form_class = ProductForm
     template_name = "update_product.html"
-    success_url = reverse_lazy("your-success-url")
+    success_url = reverse_lazy("index")
 
 
 class ProductDeleteView(DeleteView):
@@ -111,3 +115,52 @@ def category_create_view(request):
             description=request.POST.get("description")
         )
         return HttpResponseRedirect("/")
+
+
+def add_to_cart(request, pk):
+    product = Product.objects.get(pk=pk)
+    cart_item = CartItem.objects.filter(product=product, order=None).first()
+    order = Ordering.objects.last()  # Get the last order, assuming you have one created, for setting the order field
+
+    if not order:
+        order = Ordering.objects.create(name='', phone='', address='')
+
+    if not cart_item and product.stock > 0:
+        CartItem.objects.create(product=product, order=order)
+    elif cart_item and cart_item.quantity < product.stock:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    return redirect('index')
+
+
+def cart(request):
+    cart_items = CartItem.objects.all()
+    cart_total = 0
+    for cart_item in cart_items:
+        cart_item.total_amount = cart_item.product.cost * cart_item.quantity
+        cart_total += cart_item.total_amount
+
+    return render(request, 'cart.html', {'cart_items': cart_items, 'cart_total': cart_total})
+
+
+def remove_from_cart(request, pk):
+    CartItem.objects.filter(pk=pk).delete()
+    return redirect('cart')
+
+
+def create_order(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        phone = request.POST['phone']
+        address = request.POST['address']
+        order = Ordering.objects.create(name=name, phone=phone, address=address)
+        cart_items = CartItem.objects.all()
+        for cart_item in cart_items:
+            order.products.add(cart_item.product, through_defaults={'quantity': cart_item.quantity})
+
+        cart_items.delete()
+        return redirect(
+            'order_confirmation')
+    else:
+        return redirect('cart')
